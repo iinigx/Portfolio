@@ -7,6 +7,7 @@ const PERFIL = {
   nombre: "Iñigo Rojo Crespo",
   foto: "img/inigo.jpg",              // tu foto (carpeta img/)
   cv: "cv/cv-inigo-rojo.pdf",         // tu currículum en PDF (carpeta cv/)
+  rol: "2º DAM · Desarrollo de Aplicaciones Multiplataforma",
   titular: "Estudiante de 2º de DAM, me centro en el desarrollo web front-end.",
   bio: [
     "Estudio Desarrollo de Aplicaciones Multiplataforma y me gusta construir webs completas con HTML, CSS y JavaScript.",
@@ -95,3 +96,4 @@ const PROYECTOS = [
     imagen: ""
   }
 ];
+
