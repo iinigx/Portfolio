@@ -34,9 +34,10 @@
   };
   const porFecha = (a, b) => (b.fecha || "").localeCompare(a.fecha || "");
 
-  function ficha(p) {
+  function ficha(p, i = 0) {
     const art = el("article", "ficha");
     art.style.setProperty("--h", hue(p.asignatura));
+    art.style.setProperty("--i", i);
     const meta = el("div", "meta");
     meta.appendChild(el("span", "", p.asignatura));
     meta.appendChild(el("span", "", fechaBonita(p.fecha)));
@@ -96,6 +97,28 @@
       $("datos").appendChild(fila);
     });
 
+    if (PERFIL.rol) $("rol").textContent = PERFIL.rol; else $("rol").hidden = true;
+
+    const techs = {};
+    PROYECTOS.forEach((p) => p.tecnologias.forEach((t) => (techs[t] = (techs[t] || 0) + 1)));
+    [
+      [PROYECTOS.length, "Proyectos"],
+      [new Set(PROYECTOS.map((p) => p.asignatura)).size, "Asignaturas"],
+      [Object.keys(techs).length, "Tecnologías"]
+    ].forEach(([n, etiqueta]) => {
+      const li = el("li");
+      li.appendChild(el("strong", "", String(n)));
+      li.appendChild(el("span", "", etiqueta));
+      $("stats").appendChild(li);
+    });
+    Object.entries(techs)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .forEach(([t, n]) => {
+        const li = el("li", "", t);
+        li.appendChild(el("span", "n", String(n)));
+        $("stack-lista").appendChild(li);
+      });
+
     if (PERFIL.foto) {
       const img = $("foto");
       img.src = PERFIL.foto;
@@ -111,7 +134,7 @@
       btnCv.hidden = false;
     }
 
-    [...PROYECTOS].sort(porFecha).slice(0, 3).forEach((p) => $("grid-recientes").appendChild(ficha(p)));
+    [...PROYECTOS].sort(porFecha).slice(0, 3).forEach((p, i) => $("grid-recientes").appendChild(ficha(p, i)));
   }
 
   // ---------- Página de proyectos ----------
@@ -182,7 +205,7 @@
         h2.appendChild(el("span", "n", String(items.length)));
         sec.appendChild(h2);
         const grid = el("div", "grid");
-        items.forEach((p) => grid.appendChild(ficha(p)));
+        items.forEach((p, i) => grid.appendChild(ficha(p, i)));
         sec.appendChild(grid);
         cont.appendChild(sec);
       });
