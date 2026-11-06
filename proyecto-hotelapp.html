@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HotelApp, sistema de reservas | Portfolio</title>
+  <meta name="description" content="Proyecto de Diseño de interfaces: aplicación de escritorio en JavaFX para consultar habitaciones y sacar informes de reservas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#contenido">Ir al contenido</a>
+
+  <header class="top">
+    <a class="logo" href="index.html" id="logo">IRC</a>
+    <nav aria-label="Principal">
+      <a href="index.html#sobre-mi">Sobre mí</a>
+      <a href="proyectos.html" aria-current="page">Proyectos</a>
+      <a href="#" id="nav-cv" hidden>CV</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <article class="bloque sin-borde detalle">
+      <p class="migas"><a href="proyectos.html">Proyectos</a> / Diseño de interfaces</p>
+      <h1 class="pagina">HotelApp</h1>
+      <p class="intro">Sistema de reservas para el Hotel Sol: una aplicación de escritorio en JavaFX con la interfaz diseñada en FXML.</p>
+      <p class="botones">
+        <a class="boton" href="proyectos/diseno-de-interfaces/hotelapp.zip" download>Descargar código (.zip)</a>
+        <a class="boton secundario" href="proyectos.html">Volver a proyectos</a>
+      </p>
+
+      <figure class="captura">
+        <img src="img/hotelapp.png" alt="Captura de la aplicación HotelApp" onerror="this.parentElement.remove()">
+      </figure>
+
+      <h2>Qué hace</h2>
+      <ul class="lista">
+        <li>Lee los datos del hotel desde un archivo <code>reservas.xml</code> (30 habitaciones y 30 reservas) usando el parser DOM de Java.</li>
+        <li>Pestaña <strong>Habitaciones</strong>: lista con número, tipo, capacidad, precio por noche y estado, y búsqueda por número con un mensaje de color según la habitación esté disponible, ocupada o no exista.</li>
+        <li>Pestaña <strong>Informes de reservas</strong>: tabla con código, estado, cliente, habitación, fechas y personas, filtrable por estado y por mes.</li>
+        <li>Totales por estado (confirmadas, finalizadas, canceladas y pendientes) que se recalculan al aplicar el filtro.</li>
+      </ul>
+
+      <h2>Cómo está organizado</h2>
+      <ul class="lista">
+        <li><code>vista.fxml</code>: la interfaz (pestañas, tabla, filtros y etiquetas).</li>
+        <li><code>HotelController.java</code>: controlador que carga el XML, rellena la tabla y aplica los filtros.</li>
+        <li><code>Reserva.java</code>: clase modelo de una reserva.</li>
+        <li><code>Main.java</code>: arranca la aplicación y carga la vista.</li>
+        <li><code>reservas.xml</code>: datos del hotel.</li>
+      </ul>
+
+      <h2>Tecnologías</h2>
+      <ul class="etiquetas">
+        <li>Java 21</li><li>JavaFX</li><li>FXML</li><li>XML (DOM)</li><li>Maven</li>
+      </ul>
+
+      <h2>Cómo ejecutarla</h2>
+      <p>Descarga el .zip, descomprímelo y, con JDK 21 y Maven instalados, ejecuta en la carpeta del proyecto:</p>
+      <pre><code>mvn javafx:run</code></pre>
+
+      <h2>Código</h2>
+      <details open>
+        <summary>vista.fxml (diseño de la interfaz)</summary>
+        <pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;?import javafx.scene.control.Button?&gt;
+&lt;?import javafx.scene.control.ComboBox?&gt;
+&lt;?import javafx.scene.control.Label?&gt;
+&lt;?import javafx.scene.control.ListView?&gt;
+&lt;?import javafx.scene.control.Tab?&gt;
+&lt;?import javafx.scene.control.TabPane?&gt;
+&lt;?import javafx.scene.control.TableColumn?&gt;
+&lt;?import javafx.scene.control.TableView?&gt;
+&lt;?import javafx.scene.control.TextField?&gt;
+&lt;?import javafx.scene.layout.HBox?&gt;
+&lt;?import javafx.scene.layout.VBox?&gt;
+&lt;?import javafx.scene.text.Font?&gt;
+
+&lt;VBox alignment=&quot;CENTER_LEFT&quot; prefHeight=&quot;700.0&quot; prefWidth=&quot;900.0&quot; spacing=&quot;10.0&quot; xmlns=&quot;http://javafx.com/javafx/26&quot; xmlns:fx=&quot;http://javafx.com/fxml/1&quot; fx:controller=&quot;HotelController&quot;&gt;
+
+   &lt;children&gt;
+      &lt;Label text=&quot;HOTEL SOL - SISTEMA DE RESERVAS&quot;&gt;
+         &lt;font&gt;
+            &lt;Font name=&quot;System Bold&quot; size=&quot;20.0&quot; /&gt;
+         &lt;/font&gt;
+      &lt;/Label&gt;
+
+      &lt;Label fx:id=&quot;lblInfo&quot; text=&quot;Cargando datos...&quot; wrapText=&quot;true&quot; /&gt;
+
+      &lt;TabPane fx:id=&quot;tabPane&quot; prefWidth=&quot;860.0&quot; prefHeight=&quot;580.0&quot;&gt;
+         &lt;tabs&gt;
+            &lt;Tab text=&quot;Habitaciones&quot; fx:id=&quot;tabHabitaciones&quot; closable=&quot;false&quot;&gt;
+               &lt;content&gt;
+                  &lt;VBox spacing=&quot;10.0&quot;&gt;
+                     &lt;children&gt;
+                        &lt;ListView fx:id=&quot;listaHabitaciones&quot; prefHeight=&quot;300.0&quot; prefWidth=&quot;560.0&quot; /&gt;
+
+                        &lt;Label text=&quot;Buscar habitación por número:&quot; /&gt;
+
+                        &lt;HBox spacing=&quot;8.0&quot;&gt;
+                           &lt;children&gt;
+                              &lt;TextField fx:id=&quot;txtNumero&quot; prefHeight=&quot;25.0&quot; prefWidth=&quot;100.0&quot; promptText=&quot;Ej: 205&quot; /&gt;
+                              &lt;Button fx:id=&quot;btnBuscar&quot; mnemonicParsing=&quot;false&quot; onAction=&quot;#buscar&quot; text=&quot;BUSCAR&quot; /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+
+                        &lt;Label fx:id=&quot;lblResultado&quot; text=&quot;Introduce un número y pulsa Buscar.&quot; wrapText=&quot;true&quot;&gt;
+                           &lt;font&gt;
+                              &lt;Font name=&quot;System Bold&quot; size=&quot;14.0&quot; /&gt;
+                           &lt;/font&gt;
+                        &lt;/Label&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+               &lt;/content&gt;
+            &lt;/Tab&gt;
+            &lt;Tab text=&quot;Informes de reservas&quot; fx:id=&quot;tabInformes&quot; closable=&quot;false&quot;&gt;
+               &lt;content&gt;
+                  &lt;VBox spacing=&quot;10.0&quot;&gt;
+                     &lt;children&gt;
+                        &lt;Label text=&quot;Informe de reservas para el gerente&quot;&gt;
+                           &lt;font&gt;
+                              &lt;Font name=&quot;System Bold&quot; size=&quot;16.0&quot; /&gt;
+                           &lt;/font&gt;
+                        &lt;/Label&gt;
+
+                        &lt;Label text=&quot;Reservas del Hotel Sol por estado o periodo. Filtros y totales.&quot; wrapText=&quot;true&quot; /&gt;
+
+                        &lt;HBox spacing=&quot;12.0&quot;&gt;
+                           &lt;children&gt;
+                              &lt;VBox spacing=&quot;6.0&quot;&gt;
+                                 &lt;children&gt;
+                                    &lt;Label text=&quot;Estado:&quot; /&gt;
+                                    &lt;ComboBox fx:id=&quot;cmbEstadoFiltro&quot; prefWidth=&quot;140.0&quot; /&gt;
+                                 &lt;/children&gt;
+                              &lt;/VBox&gt;
+
+                              &lt;VBox spacing=&quot;6.0&quot;&gt;
+                                 &lt;children&gt;
+                                    &lt;Label text=&quot;Mes:&quot; /&gt;
+                                    &lt;ComboBox fx:id=&quot;cmbMesFiltro&quot; prefWidth=&quot;140.0&quot; /&gt;
+                                 &lt;/children&gt;
+                              &lt;/VBox&gt;
+
+                              &lt;Button fx:id=&quot;btnAplicarFiltro&quot; mnemonicParsing=&quot;false&quot; onAction=&quot;#aplicarFiltro&quot; text=&quot;APLICAR FILTRO&quot; /&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+
+                        &lt;TableView fx:id=&quot;tablaReservas&quot; prefHeight=&quot;260.0&quot; prefWidth=&quot;840.0&quot;&gt;
+                           &lt;columns&gt;
+                              &lt;TableColumn fx:id=&quot;colCodigo&quot; text=&quot;Código&quot; prefWidth=&quot;80.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colEstado&quot; text=&quot;Estado&quot; prefWidth=&quot;100.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colCliente&quot; text=&quot;Cliente&quot; prefWidth=&quot;200.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colHabitacion&quot; text=&quot;Habitación&quot; prefWidth=&quot;100.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colEntrada&quot; text=&quot;Entrada&quot; prefWidth=&quot;100.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colSalida&quot; text=&quot;Salida&quot; prefWidth=&quot;100.0&quot; /&gt;
+                              &lt;TableColumn fx:id=&quot;colPersonas&quot; text=&quot;Personas&quot; prefWidth=&quot;80.0&quot; /&gt;
+                           &lt;/columns&gt;
+                        &lt;/TableView&gt;
+
+                        &lt;HBox spacing=&quot;20.0&quot;&gt;
+                           &lt;children&gt;
+                              &lt;VBox spacing=&quot;4.0&quot;&gt;
+                                 &lt;children&gt;
+                                    &lt;Label fx:id=&quot;lblTotalReservas&quot; text=&quot;Total reservas: 0&quot;&gt;
+                                       &lt;font&gt;
+                                          &lt;Font name=&quot;System Bold&quot; size=&quot;14.0&quot; /&gt;
+                                       &lt;/font&gt;
+                                    &lt;/Label&gt;
+                                    &lt;Label fx:id=&quot;lblTotalConfirmadas&quot; text=&quot;Confirmadas: 0&quot; /&gt;
+                                 &lt;/children&gt;
+                              &lt;/VBox&gt;
+
+                              &lt;VBox spacing=&quot;4.0&quot;&gt;
+                                 &lt;children&gt;
+                                    &lt;Label fx:id=&quot;lblTotalFinalizadas&quot; text=&quot;Finalizadas: 0&quot; /&gt;
+                                    &lt;Label fx:id=&quot;lblTotalCanceladas&quot; text=&quot;Canceladas: 0&quot; /&gt;
+                                 &lt;/children&gt;
+                              &lt;/VBox&gt;
+
+                              &lt;VBox spacing=&quot;4.0&quot;&gt;
+                                 &lt;children&gt;
+                                    &lt;Label fx:id=&quot;lblTotalPendientes&quot; text=&quot;Pendientes: 0&quot; /&gt;
+                                 &lt;/children&gt;
+                              &lt;/VBox&gt;
+                           &lt;/children&gt;
+                        &lt;/HBox&gt;
+
+                        &lt;Label text=&quot;Tabla de datos con ejemplo de filtro, agrupación por estado y totales.&quot; wrapText=&quot;true&quot; /&gt;
+                     &lt;/children&gt;
+                  &lt;/VBox&gt;
+               &lt;/content&gt;
+            &lt;/Tab&gt;
+         &lt;/tabs&gt;
+      &lt;/TabPane&gt;
+   &lt;/children&gt;
+&lt;/VBox&gt;</code></pre>
+      </details>
+      <details>
+        <summary>HotelController.java (controlador)</summary>
+        <pre><code class="language-java">import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class HotelController {
+
+    /* ---------- Vistas existentes ---------- */
+    @FXML
+    private Label lblInfo;
+
+    @FXML
+    private ListView&lt;String&gt; listaHabitaciones;
+
+    @FXML
+    private TextField txtNumero;
+
+    @FXML
+    private Label lblResultado;
+
+    /* ---------- Nuevos controles para informes ---------- */
+    @FXML
+    private TabPane tabPane;
+
+    @FXML
+    private Tab tabInformes;
+
+    @FXML
+    private ComboBox&lt;String&gt; cmbEstadoFiltro;
+
+    @FXML
+    private ComboBox&lt;String&gt; cmbMesFiltro;
+
+    @FXML
+    private TableView&lt;Reserva&gt; tablaReservas;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colCodigo;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colEstado;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colCliente;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colHabitacion;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colEntrada;
+
+    @FXML
+    private TableColumn&lt;Reserva, String&gt; colSalida;
+
+    @FXML
+    private TableColumn&lt;Reserva, Integer&gt; colPersonas;
+
+    @FXML
+    private Label lblTotalReservas;
+
+    @FXML
+    private Label lblTotalConfirmadas;
+
+    @FXML
+    private Label lblTotalFinalizadas;
+
+    @FXML
+    private Label lblTotalCanceladas;
+
+    @FXML
+    private Label lblTotalPendientes;
+
+    @FXML
+    private Button btnAplicarFiltro;
+
+    /* ---------- Datos ---------- */
+    // numero -&gt; &quot;estado|tipo|capacidad|precio&quot;
+    private Map&lt;String, String[]&gt; habitaciones = new HashMap&lt;&gt;();
+    private List&lt;Reserva&gt; todasReservas = new ArrayList&lt;&gt;();
+    private ObservableList&lt;Reserva&gt; reservasFiltradas = FXCollections.observableArrayList();
+
+    @FXML
+    public void initialize() {
+        cargarXML();
+        mostrarDatos();
+        inicializarInformes();
+    }
+
+    private void cargarXML() {
+        try {
+            InputStream is = getClass().getResourceAsStream(&quot;reservas.xml&quot;);
+            // Permite ejecutar también desde el IDE si el XML está en resources
+            if (is == null) {
+                is = getClass().getResourceAsStream(&quot;/reservas.xml&quot;);
+            }
+            Document doc = DocumentBuilderFactory.newInstance()
+                    .newDocumentBuilder().parse(is);
+            doc.getDocumentElement().normalize();
+
+            String nombre = doc.getElementsByTagName(&quot;nombre&quot;).item(0).getTextContent();
+            String ciudad = doc.getElementsByTagName(&quot;ciudad&quot;).item(0).getTextContent();
+            lblInfo.setText(&quot;Hotel &quot; + nombre + &quot; (&quot; + ciudad + &quot;) - datos leídos desde reservas.xml&quot;);
+
+            NodeList listaHab = doc.getElementsByTagName(&quot;habitacion&quot;);
+            for (int i = 0; i &lt; listaHab.getLength(); i++) {
+                Element h = (Element) listaHab.item(i);
+                String numero = h.getAttribute(&quot;numero&quot;);
+                String estado = h.getAttribute(&quot;estado&quot;);
+                String tipo = h.getElementsByTagName(&quot;tipo&quot;).item(0).getTextContent();
+                String capacidad = h.getElementsByTagName(&quot;capacidad&quot;).item(0).getTextContent();
+                String precio = h.getElementsByTagName(&quot;precioNoche&quot;).item(0).getTextContent();
+                habitaciones.put(numero.trim(), new String[]{estado, tipo, capacidad, precio});
+            }
+
+            // --- Cargar reservas ---
+            NodeList listaRes = doc.getElementsByTagName(&quot;reserva&quot;);
+            for (int i = 0; i &lt; listaRes.getLength(); i++) {
+                Element r = (Element) listaRes.item(i);
+                String codigo = r.getAttribute(&quot;codigo&quot;);
+                String estado = r.getAttribute(&quot;estado&quot;);
+
+                Element cliente = (Element) r.getElementsByTagName(&quot;cliente&quot;).item(0);
+                String nombreCli = cliente.getElementsByTagName(&quot;nombre&quot;).item(0).getTextContent();
+                String apellidos = cliente.getElementsByTagName(&quot;apellidos&quot;).item(0).getTextContent();
+                String email = cliente.getElementsByTagName(&quot;email&quot;).item(0).getTextContent();
+
+                String habitacion = r.getElementsByTagName(&quot;habitacionReservada&quot;).item(0).getTextContent().trim();
+                LocalDate entrada = Reserva.parseFecha(r.getElementsByTagName(&quot;entrada&quot;).item(0).getTextContent());
+                LocalDate salida = Reserva.parseFecha(r.getElementsByTagName(&quot;salida&quot;).item(0).getTextContent());
+                int personas = Integer.parseInt(r.getElementsByTagName(&quot;personas&quot;).item(0).getTextContent().trim());
+                String obs = &quot;&quot;;
+                NodeList obsList = r.getElementsByTagName(&quot;observaciones&quot;);
+                if (obsList.getLength() &gt; 0) {
+                    obs = obsList.item(0).getTextContent();
+                }
+
+                todasReservas.add(new Reserva(codigo, estado, nombreCli, apellidos, email,
+                        habitacion, entrada, salida, personas, obs));
+            }
+        } catch (Exception e) {
+            lblInfo.setText(&quot;Error al leer reservas.xml: &quot; + e.getMessage());
+        }
+    }
+
+    private void mostrarDatos() {
+        listaHabitaciones.getItems().clear();
+        for (Map.Entry&lt;String, String[]&gt; e : habitaciones.entrySet()) {
+            String num = e.getKey();
+            String[] d = e.getValue();
+            listaHabitaciones.getItems().add(
+                &quot;Hab. &quot; + num + &quot; - &quot; + d[1] + &quot; (&quot; + d[2] + &quot; pers, &quot; + d[3] + &quot; EUR) - &quot; + d[0]);
+        }
+    }
+
+    /* ---------- Lógica de informes ---------- */
+    private void inicializarInformes() {
+        // Configurar columnas de la tabla
+        colCodigo.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;codigo&quot;));
+        colEstado.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;estadoFormateado&quot;));
+        colCliente.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;clienteCompleto&quot;));
+        colHabitacion.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;habitacion&quot;));
+        colEntrada.setCellValueFactory(cell -&gt; {
+            LocalDate fecha = cell.getValue().getEntrada();
+            return new javafx.beans.property.SimpleStringProperty(fecha != null ? fecha.format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;)) : &quot;&quot;);
+        });
+        colSalida.setCellValueFactory(cell -&gt; {
+            LocalDate fecha = cell.getValue().getSalida();
+            return new javafx.beans.property.SimpleStringProperty(fecha != null ? fecha.format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;)) : &quot;&quot;);
+        });
+        colPersonas.setCellValueFactory(new PropertyValueFactory&lt;&gt;(&quot;personas&quot;));
+
+        // Rellenar ComboBox de estados
+        cmbEstadoFiltro.getItems().addAll(&quot;Todos&quot;, &quot;Confirmada&quot;, &quot;Finalizada&quot;, &quot;Cancelada&quot;, &quot;Pendiente&quot;);
+        cmbEstadoFiltro.setValue(&quot;Todos&quot;);
+
+        // Rellenar ComboBox de meses
+        cmbMesFiltro.getItems().addAll(&quot;Todos los meses&quot;, &quot;Octubre 2026&quot;, &quot;Noviembre 2026&quot;);
+        cmbMesFiltro.setValue(&quot;Todos los meses&quot;);
+
+        // Cargar datos iniciales (sin filtro)
+        aplicarFiltro();
+
+        // Acción del botón
+        btnAplicarFiltro.setOnAction(e -&gt; aplicarFiltro());
+    }
+
+    @FXML
+    private void aplicarFiltro() {
+        String estadoFiltro = cmbEstadoFiltro.getValue();
+        String mesFiltro = cmbMesFiltro.getValue();
+
+        reservasFiltradas.clear();
+        for (Reserva r : todasReservas) {
+            boolean coincideEstado = &quot;Todos&quot;.equals(estadoFiltro)
+                    || r.getEstadoFormateado().equalsIgnoreCase(estadoFiltro);
+
+            boolean coincideMes = true;
+            if (!&quot;Todos los meses&quot;.equals(mesFiltro) &amp;&amp; r.getEntrada() != null) {
+                int mes = r.getEntrada().getMonthValue();
+                int anio = r.getEntrada().getYear();
+                if (&quot;Octubre 2026&quot;.equals(mesFiltro)) {
+                    coincideMes = (anio == 2026 &amp;&amp; mes == Month.OCTOBER.getValue());
+                } else if (&quot;Noviembre 2026&quot;.equals(mesFiltro)) {
+                    coincideMes = (anio == 2026 &amp;&amp; mes == Month.NOVEMBER.getValue());
+                }
+            }
+
+            if (coincideEstado &amp;&amp; coincideMes) {
+                reservasFiltradas.add(r);
+            }
+        }
+
+        tablaReservas.setItems(reservasFiltradas);
+        actualizarTotales();
+    }
+
+    private void actualizarTotales() {
+        int total = reservasFiltradas.size();
+        int confirmadas = 0, finalizadas = 0, canceladas = 0, pendientes = 0;
+
+        for (Reserva r : reservasFiltradas) {
+            switch (r.getEstado().toLowerCase()) {
+                case &quot;confirmada&quot; -&gt; confirmadas++;
+                case &quot;finalizada&quot; -&gt; finalizadas++;
+                case &quot;cancelada&quot; -&gt; canceladas++;
+                case &quot;pendiente&quot; -&gt; pendientes++;
+            }
+        }
+
+        lblTotalReservas.setText(&quot;Total reservas: &quot; + total);
+        lblTotalConfirmadas.setText(&quot;Confirmadas: &quot; + confirmadas);
+        lblTotalFinalizadas.setText(&quot;Finalizadas: &quot; + finalizadas);
+        lblTotalCanceladas.setText(&quot;Canceladas: &quot; + canceladas);
+        lblTotalPendientes.setText(&quot;Pendientes: &quot; + pendientes);
+    }
+
+    @FXML
+    private void buscar() {
+        String numero = txtNumero.getText().trim();
+
+        if (numero.isEmpty()) {
+            lblResultado.setText(&quot;Escribe un número de habitación.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: orange;&quot;);
+            return;
+        }
+
+        if (!habitaciones.containsKey(numero)) {
+            lblResultado.setText(&quot;La habitación &quot; + numero + &quot; no existe.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: purple;&quot;);
+            return;
+        }
+
+        String[] d = habitaciones.get(numero);
+        String estado = d[0];
+        String texto = &quot;Hab. &quot; + numero + &quot; (&quot; + d[1] + &quot;, &quot; + d[2]
+                + &quot; pers, &quot; + d[3] + &quot; EUR/noche): &quot;;
+
+        if (estado.equalsIgnoreCase(&quot;libre&quot;)
+                || estado.equalsIgnoreCase(&quot;disponible&quot;)) {
+            lblResultado.setText(texto + &quot;DISPONIBLE.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: green;&quot;);
+        } else {
+            lblResultado.setText(texto + &quot;OCUPADA.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: red;&quot;);
+        }
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>Reserva.java (modelo)</summary>
+        <pre><code class="language-java">import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * Clase modelo que representa una reserva del hotel.
+ */
+public class Reserva {
+
+    private final String codigo;
+    private final String estado;
+    private final String clienteNombre;
+    private final String clienteApellidos;
+    private final String clienteEmail;
+    private final String habitacion;
+    private final LocalDate entrada;
+    private final LocalDate salida;
+    private final int personas;
+    private final String observaciones;
+
+    public Reserva(String codigo, String estado, String clienteNombre,
+                   String clienteApellidos, String clienteEmail, String habitacion,
+                   LocalDate entrada, LocalDate salida, int personas, String observaciones) {
+        this.codigo = codigo;
+        this.estado = estado;
+        this.clienteNombre = clienteNombre;
+        this.clienteApellidos = clienteApellidos;
+        this.clienteEmail = clienteEmail;
+        this.habitacion = habitacion;
+        this.entrada = entrada;
+        this.salida = salida;
+        this.personas = personas;
+        this.observaciones = observaciones;
+    }
+
+    public String getCodigo() { return codigo; }
+    public String getEstado() { return estado; }
+    public String getClienteNombre() { return clienteNombre; }
+    public String getClienteApellidos() { return clienteApellidos; }
+    public String getClienteEmail() { return clienteEmail; }
+    public String getHabitacion() { return habitacion; }
+    public LocalDate getEntrada() { return entrada; }
+    public LocalDate getSalida() { return salida; }
+    public int getPersonas() { return personas; }
+    public String getObservaciones() { return observaciones; }
+
+    public String getClienteCompleto() {
+        return clienteNombre + &quot; &quot; + clienteApellidos;
+    }
+
+    public String getEstadoFormateado() {
+        return Character.toUpperCase(estado.charAt(0)) + estado.substring(1);
+    }
+
+    public static LocalDate parseFecha(String fechaTexto) {
+        if (fechaTexto == null || fechaTexto.isEmpty()) {
+            return null;
+        }
+        return LocalDate.parse(fechaTexto, DateTimeFormatter.ISO_LOCAL_DATE);
+    }
+
+    @Override
+    public String toString() {
+        return codigo + &quot; - &quot; + estado + &quot; - &quot; + getClienteCompleto()
+                + &quot; - Hab. &quot; + habitacion + &quot; - &quot; + entrada + &quot; a &quot; + salida;
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>Main.java (arranque)</summary>
+        <pre><code class="language-java">import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+    public void start(Stage stage) throws Exception {
+
+        FXMLLoader loader =
+                new FXMLLoader(getClass().getResource(&quot;/vista.fxml&quot;));
+
+        Scene scene = new Scene(loader.load());
+
+        stage.setTitle(&quot;HotelApp - Sistema de reservas (Parte 1)&quot;);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}</code></pre>
+      </details>
+    </article>
+  </main>
+
+  <footer>
+    <p id="pie"></p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
