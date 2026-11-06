@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
   <title>Portfolio de Iñigo Rojo Crespo</title>
   <meta name="description" content="Portfolio de proyectos de clase de 2º DAM: Java, Android y desarrollo web.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip" href="#sobre-mi">Ir al contenido</a>
 
   <header class="top">
-    <a class="logo" href="index.html" id="logo">IRC</a>
+    <a class="logo" href="index.html" id="logo" aria-label="Inicio">IRC</a>
     <nav aria-label="Principal">
       <a href="index.html#sobre-mi">Sobre mí</a>
       <a href="proyectos.html">Proyectos</a>
@@ -24,24 +25,30 @@
 
   <main>
     <section class="hero" id="inicio">
-      <h1 id="nombre"></h1>
-      <p class="titular" id="titular"></p>
-      <p class="botones">
-        <a class="boton" href="proyectos.html">Ver proyectos</a>
-        <a class="boton secundario" id="btn-cv" href="#" hidden>Descargar CV</a>
-      </p>
-      <p class="nota">Proyectos de clase, actualizados a medida que los termino.</p>
+      <div class="hero-texto">
+        <p class="insignia" id="rol"></p>
+        <h1 id="nombre"></h1>
+        <p class="titular" id="titular"></p>
+        <p class="botones">
+          <a class="boton" href="proyectos.html">Ver proyectos</a>
+          <a class="boton secundario" id="btn-cv" href="#" hidden>Descargar CV</a>
+        </p>
+        <ul class="stats" id="stats" aria-label="Resumen"></ul>
+      </div>
+      <figure class="hero-foto" id="retrato" hidden><img id="foto" alt=""></figure>
     </section>
 
     <section class="bloque" id="sobre-mi" aria-labelledby="t-sobre">
       <h2 id="t-sobre">Sobre mí</h2>
       <div class="sobre">
         <div id="bio"></div>
-        <div class="lado">
-          <figure class="retrato" id="retrato" hidden><img id="foto" alt=""></figure>
-          <dl id="datos"></dl>
-        </div>
+        <dl id="datos"></dl>
       </div>
+    </section>
+
+    <section class="bloque" id="stack" aria-labelledby="t-stack">
+      <h2 id="t-stack">Tecnologías</h2>
+      <ul class="tags" id="stack-lista"></ul>
     </section>
 
     <section class="bloque" id="recientes" aria-labelledby="t-rec">
@@ -59,3 +66,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
