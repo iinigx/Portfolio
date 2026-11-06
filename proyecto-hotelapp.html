@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
   <title>HotelApp, sistema de reservas | Portfolio</title>
   <meta name="description" content="Proyecto de Diseño de interfaces: aplicación de escritorio en JavaFX para consultar habitaciones y sacar informes de reservas.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip" href="#contenido">Ir al contenido</a>
 
   <header class="top">
-    <a class="logo" href="index.html" id="logo">IRC</a>
+    <a class="logo" href="index.html" id="logo" aria-label="Inicio">IRC</a>
     <nav aria-label="Principal">
       <a href="index.html#sobre-mi">Sobre mí</a>
       <a href="proyectos.html" aria-current="page">Proyectos</a>
@@ -583,6 +585,8 @@ public class Main extends Application {
     <p id="pie"></p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>if (window.hljs) { hljs.highlightAll(); }</script>
   <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
