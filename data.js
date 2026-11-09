@@ -45,6 +45,18 @@ const PROYECTOS = [
     demo: "",
     imagen: ""
   },
+    {
+    titulo: "Aplicación Hotel, ingresos por fechas",
+    asignatura: "Diseño de interfaces",
+    fecha: "2026-10",
+    descripcion: "Aplicación de escritorio para un hotel: lista de habitaciones, búsqueda por número y cálculo de ingresos entre dos fechas con selectores de fecha y tabla de totales.",
+    tecnologias: ["Java", "JavaFX", "FXML", "XML"],
+    detalle: "proyecto-aplicacionhotel.html",
+    descarga: "proyectos/diseno-de-interfaces/aplicacionhotel.zip",
+    repo: "",
+    demo: "",
+    imagen: ""
+  },
   {
     titulo: "Analizador multiproceso de texto",
     asignatura: "PSP",
