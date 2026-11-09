@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b14">
+  <title>Aplicación Hotel, ingresos por fechas | Portfolio</title>
+  <meta name="description" content="Proyecto de Diseño de interfaces: aplicación de escritorio en JavaFX para buscar habitaciones y calcular ingresos entre dos fechas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#contenido">Ir al contenido</a>
+
+  <header class="top">
+    <a class="logo" href="index.html" id="logo" aria-label="Inicio">IRC</a>
+    <nav aria-label="Principal">
+      <a href="index.html#sobre-mi">Sobre mí</a>
+      <a href="proyectos.html" aria-current="page">Proyectos</a>
+      <a href="#" id="nav-cv" hidden>CV</a>
+    </nav>
+  </header>
+
+  <main id="contenido">
+    <article class="bloque sin-borde detalle">
+      <p class="migas"><a href="proyectos.html">Proyectos</a> / Diseño de interfaces</p>
+      <h1 class="pagina">Aplicación Hotel</h1>
+      <p class="intro">Ingresos por fechas para el Hotel Sol: una aplicación de escritorio en JavaFX con la interfaz diseñada en FXML.</p>
+      <p class="botones">
+        <a class="boton" href="proyectos/diseno-de-interfaces/aplicacionhotel.zip" download>Descargar código (.zip)</a>
+        <a class="boton secundario" href="proyectos.html">Volver a proyectos</a>
+      </p>
+
+      <figure class="captura">
+        <img src="img/aplicacionhotel.png" alt="Captura de la aplicación Aplicación Hotel" onerror="this.parentElement.remove()">
+      </figure>
+
+      <h2>Qué hace</h2>
+      <ul class="lista">
+        <li>Lee los datos del hotel desde <code>reservas.xml</code> (30 habitaciones y 30 reservas) con el parser DOM de Java.</li>
+        <li>Muestra la lista de habitaciones con tipo, capacidad, precio por noche y estado.</li>
+        <li><strong>Búsqueda por número</strong>: responde con colores, verde si la habitación está disponible, rojo si está ocupada y morado si no existe.</li>
+        <li><strong>Ingresos según fecha</strong>: dos selectores de fecha (Desde y Hasta) filtran las reservas por fecha de entrada.</li>
+        <li>La tabla agrupa las reservas por día, calcula el ingreso como precio por noche por número de noches y añade una fila de <strong>TOTAL</strong>.</li>
+      </ul>
+
+      <h2>Cómo está organizado</h2>
+      <ul class="lista">
+        <li><code>vista.fxml</code>: la interfaz (título, lista, búsqueda, selectores de fecha y tabla).</li>
+        <li><code>HotelController.java</code>: controlador que carga el XML, busca habitaciones y calcula los ingresos.</li>
+        <li><code>IngresoFecha.java</code>: cada fila de la tabla de ingresos.</li>
+        <li><code>Reserva.java</code>: clase modelo de una reserva.</li>
+        <li><code>EstadoStats.java</code>: clase auxiliar con estado, cantidad e ingresos.</li>
+        <li><code>Main.java</code>: arranca la aplicación y carga la vista.</li>
+      </ul>
+
+      <h2>Tecnologías</h2>
+      <ul class="etiquetas">
+        <li>Java 21</li><li>JavaFX</li><li>FXML</li><li>XML (DOM)</li><li>Maven</li>
+      </ul>
+
+      <h2>Cómo ejecutarla</h2>
+      <p>Descarga el .zip, descomprímelo y, con JDK 21 y Maven instalados, ejecuta en la carpeta del proyecto:</p>
+      <pre><code>mvn clean javafx:run</code></pre>
+
+      <h2>Código</h2>
+      <details open>
+        <summary>vista.fxml (diseño de la interfaz)</summary>
+        <pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;?import javafx.scene.control.Button?&gt;
+&lt;?import javafx.scene.control.DatePicker?&gt;
+&lt;?import javafx.scene.control.Label?&gt;
+&lt;?import javafx.scene.control.ListView?&gt;
+&lt;?import javafx.scene.control.TableColumn?&gt;
+&lt;?import javafx.scene.control.TableView?&gt;
+&lt;?import javafx.scene.control.TextField?&gt;
+&lt;?import javafx.scene.control.cell.PropertyValueFactory?&gt;
+&lt;?import javafx.scene.layout.HBox?&gt;
+&lt;?import javafx.scene.layout.VBox?&gt;
+&lt;?import javafx.scene.text.Font?&gt;
+
+&lt;VBox alignment=&quot;CENTER&quot; prefHeight=&quot;650.0&quot; prefWidth=&quot;674.0&quot; spacing=&quot;12.0&quot; xmlns=&quot;http://javafx.com/javafx/26&quot; xmlns:fx=&quot;http://javafx.com/fxml/1&quot; fx:controller=&quot;HotelController&quot;&gt;
+
+   &lt;children&gt;
+      &lt;Label text=&quot;HOTEL SOL - RESERVAS&quot;&gt;
+         &lt;font&gt;
+            &lt;Font name=&quot;System Bold&quot; size=&quot;22.0&quot; /&gt;
+         &lt;/font&gt;
+      &lt;/Label&gt;
+
+      &lt;Label fx:id=&quot;lblInfo&quot; text=&quot;Cargando datos...&quot; wrapText=&quot;true&quot; /&gt;
+
+      &lt;ListView fx:id=&quot;listaHabitaciones&quot; prefHeight=&quot;410.0&quot; prefWidth=&quot;600.0&quot; /&gt;
+
+      &lt;Label text=&quot;Buscar habitación por número:&quot; /&gt;
+
+      &lt;TextField fx:id=&quot;txtNumero&quot; prefHeight=&quot;25.0&quot; prefWidth=&quot;67.0&quot; promptText=&quot;Ej: 205&quot; /&gt;
+
+      &lt;Button fx:id=&quot;btnBuscar&quot; mnemonicParsing=&quot;false&quot; onAction=&quot;#buscar&quot; text=&quot;BUSCAR&quot; /&gt;
+
+      &lt;Label fx:id=&quot;lblResultado&quot; text=&quot;Introduce un número y pulsa Buscar.&quot; wrapText=&quot;true&quot;&gt;
+         &lt;font&gt;
+            &lt;Font name=&quot;System Bold&quot; size=&quot;14.0&quot; /&gt;
+         &lt;/font&gt;
+      &lt;/Label&gt;
+
+      &lt;!-- Ingresos según fecha --&gt;
+      &lt;Label style=&quot;-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;&quot; text=&quot;Ingresos según fecha&quot; /&gt;
+
+      &lt;HBox alignment=&quot;CENTER_LEFT&quot; spacing=&quot;15&quot;&gt;
+         &lt;children&gt;
+            &lt;Label text=&quot;Desde:&quot; /&gt;
+            &lt;DatePicker fx:id=&quot;dateDesde&quot; promptText=&quot;dd/MM/yyyy&quot; /&gt;
+            &lt;Label text=&quot;Hasta:&quot; /&gt;
+            &lt;DatePicker fx:id=&quot;dateHasta&quot; promptText=&quot;dd/MM/yyyy&quot; /&gt;
+            &lt;Button fx:id=&quot;btnIngresosFecha&quot; onAction=&quot;#calcularIngresosFecha&quot; style=&quot;-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 20; -fx-cursor: hand;&quot; text=&quot;Calcular Ingresos&quot; /&gt;
+         &lt;/children&gt;
+      &lt;/HBox&gt;
+
+      &lt;TableView fx:id=&quot;tablaIngresosFecha&quot; prefWidth=&quot;500.0&quot;&gt;
+         &lt;columns&gt;
+            &lt;TableColumn prefWidth=&quot;150.0&quot; text=&quot;Fecha&quot;&gt;
+               &lt;cellValueFactory&gt;&lt;PropertyValueFactory property=&quot;fecha&quot; /&gt;&lt;/cellValueFactory&gt;
+            &lt;/TableColumn&gt;
+            &lt;TableColumn prefWidth=&quot;100.0&quot; text=&quot;Reservas&quot;&gt;
+               &lt;cellValueFactory&gt;&lt;PropertyValueFactory property=&quot;cantidad&quot; /&gt;&lt;/cellValueFactory&gt;
+            &lt;/TableColumn&gt;
+            &lt;TableColumn prefWidth=&quot;150.0&quot; text=&quot;Ingresos (€)&quot;&gt;
+               &lt;cellValueFactory&gt;&lt;PropertyValueFactory property=&quot;ingresos&quot; /&gt;&lt;/cellValueFactory&gt;
+            &lt;/TableColumn&gt;
+         &lt;/columns&gt;
+      &lt;/TableView&gt;
+   &lt;/children&gt;
+&lt;/VBox&gt;</code></pre>
+      </details>
+      <details>
+        <summary>HotelController.java (controlador)</summary>
+        <pre><code class="language-java">import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class HotelController {
+
+    @FXML
+    private Label lblInfo;
+
+    @FXML
+    private ListView&lt;String&gt; listaHabitaciones;
+
+    @FXML
+    private TextField txtNumero;
+
+    @FXML
+    private Label lblResultado;
+
+    @FXML
+    private DatePicker dateDesde;
+
+    @FXML
+    private DatePicker dateHasta;
+
+    @FXML
+    private Button btnIngresosFecha;
+
+    @FXML
+    private TableView&lt;IngresoFecha&gt; tablaIngresosFecha;
+
+    // numero -&gt; &quot;estado|tipo|capacidad|precio&quot;
+    private Map&lt;String, String[]&gt; habitaciones = new HashMap&lt;&gt;();
+
+    private List&lt;Reserva&gt; reservas = new ArrayList&lt;&gt;();
+
+    @FXML
+    public void initialize() {
+        cargarXML();
+        mostrarDatos();
+    }
+
+    private void cargarXML() {
+        try {
+            InputStream is = getClass().getResourceAsStream(&quot;reservas.xml&quot;);
+            // Permite ejecutar también desde el IDE si el XML está en resources
+            if (is == null) {
+                is = getClass().getResourceAsStream(&quot;/reservas.xml&quot;);
+            }
+            Document doc = DocumentBuilderFactory.newInstance()
+                    .newDocumentBuilder().parse(is);
+            doc.getDocumentElement().normalize();
+
+            String nombre = doc.getElementsByTagName(&quot;nombre&quot;).item(0).getTextContent();
+            String ciudad = doc.getElementsByTagName(&quot;ciudad&quot;).item(0).getTextContent();
+            lblInfo.setText(&quot;Hotel &quot; + nombre + &quot; (&quot; + ciudad + &quot;) - datos leídos desde reservas.xml&quot;);
+
+            NodeList listaHab = doc.getElementsByTagName(&quot;habitacion&quot;);
+            for (int i = 0; i &lt; listaHab.getLength(); i++) {
+                Element h = (Element) listaHab.item(i);
+                String numero = h.getAttribute(&quot;numero&quot;);
+                String estado = h.getAttribute(&quot;estado&quot;);
+                String tipo = h.getElementsByTagName(&quot;tipo&quot;).item(0).getTextContent();
+                String capacidad = h.getElementsByTagName(&quot;capacidad&quot;).item(0).getTextContent();
+                String precio = h.getElementsByTagName(&quot;precioNoche&quot;).item(0).getTextContent();
+                habitaciones.put(numero.trim(), new String[]{estado, tipo, capacidad, precio});
+            }
+
+            // Cargar reservas
+            NodeList listaRes = doc.getElementsByTagName(&quot;reserva&quot;);
+            for (int i = 0; i &lt; listaRes.getLength(); i++) {
+                Element r = (Element) listaRes.item(i);
+                String codigo = r.getAttribute(&quot;codigo&quot;);
+                String estado = r.getAttribute(&quot;estado&quot;);
+
+                Element cliente = (Element) r.getElementsByTagName(&quot;cliente&quot;).item(0);
+                String nombreCli = cliente.getElementsByTagName(&quot;nombre&quot;).item(0).getTextContent();
+                String apellidosCli = cliente.getElementsByTagName(&quot;apellidos&quot;).item(0).getTextContent();
+                String emailCli = cliente.getElementsByTagName(&quot;email&quot;).item(0).getTextContent();
+
+                String habRes = r.getElementsByTagName(&quot;habitacionReservada&quot;).item(0).getTextContent();
+                String entrada = r.getElementsByTagName(&quot;entrada&quot;).item(0).getTextContent();
+                String salida = r.getElementsByTagName(&quot;salida&quot;).item(0).getTextContent();
+                String personas = r.getElementsByTagName(&quot;personas&quot;).item(0).getTextContent();
+                String obs = &quot;&quot;;
+                NodeList obsList = r.getElementsByTagName(&quot;observaciones&quot;);
+                if (obsList.getLength() &gt; 0) {
+                    obs = obsList.item(0).getTextContent();
+                }
+
+                reservas.add(new Reserva(codigo, estado, nombreCli, apellidosCli, emailCli,
+                        habRes, entrada, salida, personas, obs));
+            }
+        } catch (Exception e) {
+            lblInfo.setText(&quot;Error al leer reservas.xml: &quot; + e.getMessage());
+        }
+    }
+
+    private void mostrarDatos() {
+        listaHabitaciones.getItems().clear();
+        for (Map.Entry&lt;String, String[]&gt; e : habitaciones.entrySet()) {
+            String num = e.getKey();
+            String[] d = e.getValue();
+            listaHabitaciones.getItems().add(
+                &quot;Hab. &quot; + num + &quot; - &quot; + d[1] + &quot; (&quot; + d[2] + &quot; pers, &quot; + d[3] + &quot; EUR) - &quot; + d[0]);
+        }
+    }
+
+    @FXML
+    private void buscar() {
+        String numero = txtNumero.getText().trim();
+
+        if (numero.isEmpty()) {
+            lblResultado.setText(&quot;Escribe un número de habitación.&quot;);
+            return;
+        }
+
+        if (!habitaciones.containsKey(numero)) {
+            lblResultado.setText(&quot;La habitación &quot; + numero + &quot; no existe.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: purple;&quot;);
+            return;
+        }
+
+        String[] d = habitaciones.get(numero);
+        String estado = d[0];
+        String texto = &quot;Hab. &quot; + numero + &quot; (&quot; + d[1] + &quot;, &quot; + d[2]
+                + &quot; pers, &quot; + d[3] + &quot; EUR/noche): &quot;;
+
+        if (estado.equalsIgnoreCase(&quot;libre&quot;)
+                || estado.equalsIgnoreCase(&quot;disponible&quot;)) {
+            lblResultado.setText(texto + &quot;DISPONIBLE.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: green;&quot;);
+        } else {
+            lblResultado.setText(texto + &quot;OCUPADA.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: red;&quot;);
+        }
+    }
+
+    @FXML
+    private void calcularIngresosFecha() {
+        LocalDate desde = dateDesde.getValue();
+        LocalDate hasta = dateHasta.getValue();
+
+        // Filtrar reservas por rango de fechas (si se especifican)
+        List&lt;Reserva&gt; filtradas = new ArrayList&lt;&gt;();
+        for (Reserva r : reservas) {
+            LocalDate fechaEntrada = parseFecha(r.getEntrada());
+            if (fechaEntrada == null) continue;
+            if (desde != null &amp;&amp; fechaEntrada.isBefore(desde)) continue;
+            if (hasta != null &amp;&amp; fechaEntrada.isAfter(hasta)) continue;
+            filtradas.add(r);
+        }
+
+        if (filtradas.isEmpty()) {
+            lblResultado.setText(&quot;No hay reservas en el rango de fechas seleccionado.&quot;);
+            lblResultado.setStyle(&quot;-fx-text-fill: orange;&quot;);
+            tablaIngresosFecha.getItems().clear();
+            return;
+        }
+
+        // Agrupar ingresos por fecha de entrada
+        Map&lt;String, Integer&gt; conteoPorFecha = new HashMap&lt;&gt;();
+        Map&lt;String, Double&gt; ingresosPorFecha = new HashMap&lt;&gt;();
+        for (Reserva r : filtradas) {
+            String fecha = r.getEntrada();
+            conteoPorFecha.put(fecha, conteoPorFecha.getOrDefault(fecha, 0) + 1);
+            double ing = calcularIngresosReserva(r);
+            ingresosPorFecha.put(fecha, ingresosPorFecha.getOrDefault(fecha, 0.0) + ing);
+        }
+
+        // Llenar tabla
+        ObservableList&lt;IngresoFecha&gt; datos = FXCollections.observableArrayList();
+        int totalCantidad = 0;
+        double totalIngresos = 0;
+        for (Map.Entry&lt;String, Integer&gt; e : conteoPorFecha.entrySet()) {
+            String fecha = e.getKey();
+            int cant = e.getValue();
+            double ing = ingresosPorFecha.getOrDefault(fecha, 0.0);
+            datos.add(new IngresoFecha(fecha, cant, ing));
+            totalCantidad += cant;
+            totalIngresos += ing;
+        }
+        datos.add(new IngresoFecha(&quot;TOTAL&quot;, totalCantidad, totalIngresos));
+        tablaIngresosFecha.setItems(datos);
+
+        lblResultado.setText(String.format(&quot;Ingresos calculados: %d reservas, %.2f € totales&quot;,
+                totalCantidad, totalIngresos));
+        lblResultado.setStyle(&quot;-fx-text-fill: green;&quot;);
+    }
+
+    private double calcularIngresosReserva(Reserva r) {
+        String habNum = r.getHabitacionReservada().trim();
+        String[] habData = habitaciones.get(habNum);
+        if (habData == null) return 0.0;
+
+        double precioNoche = Double.parseDouble(habData[3]);
+        LocalDate entrada = parseFecha(r.getEntrada());
+        LocalDate salida = parseFecha(r.getSalida());
+        if (entrada == null || salida == null) return 0.0;
+
+        long noches = java.time.temporal.ChronoUnit.DAYS.between(entrada, salida);
+        if (noches &lt;= 0) noches = 1;
+
+        return precioNoche * noches;
+    }
+
+    private LocalDate parseFecha(String fechaStr) {
+        try {
+            return LocalDate.parse(fechaStr, DateTimeFormatter.ISO_DATE);
+        } catch (Exception e) {
+            try {
+                return LocalDate.parse(fechaStr, DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>IngresoFecha.java (fila de la tabla)</summary>
+        <pre><code class="language-java">public class IngresoFecha {
+
+    private final String fecha;
+    private final int cantidad;
+    private final double ingresos;
+
+    public IngresoFecha(String fecha, int cantidad, double ingresos) {
+        this.fecha = fecha;
+        this.cantidad = cantidad;
+        this.ingresos = ingresos;
+    }
+
+    public String getFecha() { return fecha; }
+    public int getCantidad() { return cantidad; }
+    public double getIngresos() { return ingresos; }
+
+    public String getIngresosFormatted() {
+        return String.format(&quot;%.2f €&quot;, ingresos);
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>Reserva.java (modelo)</summary>
+        <pre><code class="language-java">public class Reserva {
+
+    private final String codigo;
+    private final String estado;
+    private final String clienteNombre;
+    private final String clienteApellidos;
+    private final String clienteEmail;
+    private final String habitacionReservada;
+    private final String entrada;
+    private final String salida;
+    private final String personas;
+    private final String observaciones;
+
+    public Reserva(String codigo, String estado, String clienteNombre, String clienteApellidos,
+                   String clienteEmail, String habitacionReservada, String entrada, String salida,
+                   String personas, String observaciones) {
+        this.codigo = codigo;
+        this.estado = estado;
+        this.clienteNombre = clienteNombre;
+        this.clienteApellidos = clienteApellidos;
+        this.clienteEmail = clienteEmail;
+        this.habitacionReservada = habitacionReservada;
+        this.entrada = entrada;
+        this.salida = salida;
+        this.personas = personas;
+        this.observaciones = observaciones;
+    }
+
+    public String getCodigo() { return codigo; }
+    public String getEstado() { return estado; }
+    public String getClienteNombre() { return clienteNombre; }
+    public String getClienteApellidos() { return clienteApellidos; }
+    public String getClienteEmail() { return clienteEmail; }
+    public String getHabitacionReservada() { return habitacionReservada; }
+    public String getEntrada() { return entrada; }
+    public String getSalida() { return salida; }
+    public String getPersonas() { return personas; }
+    public String getObservaciones() { return observaciones; }
+
+    @Override
+    public String toString() {
+        return &quot;Reserva{&quot; +
+                &quot;codigo=&#x27;&quot; + codigo + &#x27;\&#x27;&#x27; +
+                &quot;, estado=&#x27;&quot; + estado + &#x27;\&#x27;&#x27; +
+                &quot;, cliente=&quot; + clienteNombre + &quot; &quot; + clienteApellidos +
+                &quot;, habitacion=&quot; + habitacionReservada +
+                &quot;, entrada=&quot; + entrada + &quot;, salida=&quot; + salida +
+                &#x27;}&#x27;;
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>EstadoStats.java (clase auxiliar)</summary>
+        <pre><code class="language-java">public class EstadoStats {
+
+    private final String estado;
+    private final int cantidad;
+    private final double ingresos;
+
+    public EstadoStats(String estado, int cantidad, double ingresos) {
+        this.estado = estado;
+        this.cantidad = cantidad;
+        this.ingresos = ingresos;
+    }
+
+    public String getEstado() { return estado; }
+    public int getCantidad() { return cantidad; }
+    public double getIngresos() { return ingresos; }
+
+    public String getIngresosFormatted() {
+        return String.format(&quot;%.2f €&quot;, ingresos);
+    }
+}</code></pre>
+      </details>
+      <details>
+        <summary>Main.java (arranque)</summary>
+        <pre><code class="language-java">import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class Main extends Application {
+
+    @Override
+    public void start(Stage stage) throws Exception {
+
+        FXMLLoader loader =
+                new FXMLLoader(getClass().getResource(&quot;/vista.fxml&quot;));
+
+        Scene scene = new Scene(loader.load());
+
+        stage.setTitle(&quot;HotelApp - Sistema de reservas&quot;);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}</code></pre>
+      </details>
+    </article>
+  </main>
+
+  <footer>
+    <p id="pie"></p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>if (window.hljs) { hljs.highlightAll(); }</script>
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
